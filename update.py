@@ -5,6 +5,7 @@ from datetime import datetime
 
 LEETCODE_TOTALS = {"Easy": 876, "Medium": 1840, "Hard": 833}
 TOTAL_PROBLEMS = sum(LEETCODE_TOTALS.values())
+
 PROBLEMS_DIR = "problems"
 DIFFICULTIES_DIR = "difficulties"
 README_FILE = "README.md"
@@ -21,28 +22,34 @@ DIFFICULTY_ICONS = {
 }
 
 
-def extract_from_cleaned_format(filepath):
+def extract_problem_info(filepath):
     with open(filepath, encoding="utf-8") as f:
-        content = f.read()
+        lines = f.readlines()
 
-    match = re.match(
-        r'"""\s*\[(\d+)\]\s*\[(Easy|Medium|Hard)\]\s*(.+?)\s+https://leetcode\.com/problems/([a-z0-9-]+)/?\s*"""',
-        content,
-        re.DOTALL | re.IGNORECASE,
-    )
-    if not match:
+    if len(lines) < 2:
         return None
 
-    number = match.group(1)
-    difficulty = match.group(2)
-    title = match.group(3).strip()
-    slug = match.group(4).strip()
-    link = f"https://leetcode.com/problems/{slug}"
+    url_line = lines[0].strip()
+    info_line = lines[1].strip()
+
+    if not url_line.startswith("# https://leetcode.com/problems/") or not info_line.startswith("# ["):
+        return None
+
+    url = url_line[2:].strip()
+    try:
+        number_part, difficulty_part_title = info_line[2:].strip().split("]", 1)
+        number = number_part.strip("[")
+        difficulty, title = difficulty_part_title.strip().split("]", 1)
+        difficulty = difficulty.strip("[").capitalize()
+        title = title.strip()
+    except Exception as e:
+        print(f"⚠️ Skipped {filepath}: cannot parse header line.")
+        return None
 
     return {
         "number": number,
         "title": title,
-        "link": link,
+        "link": url,
         "difficulty": difficulty,
         "filepath": filepath,
     }
@@ -68,46 +75,24 @@ def update_readme(problems):
     total_percent = total_solved / TOTAL_PROBLEMS * 100
     today = datetime.now().strftime("%Y__%m__%d")
 
-    readme = re.sub(
-        r"<!-- TOTAL_SOLVED_COUNT -->.*?<!-- /TOTAL_SOLVED_COUNT -->",
-        f"<!-- TOTAL_SOLVED_COUNT -->**{total_solved}**<!-- /TOTAL_SOLVED_COUNT -->",
-        readme,
-    )
-    readme = re.sub(
-        r"<!-- TOTAL_PROGRESS_PERCENT -->.*?<!-- /TOTAL_PROGRESS_PERCENT -->",
-        f"<!-- TOTAL_PROGRESS_PERCENT -->**{total_percent:.1f}**<!-- /TOTAL_PROGRESS_PERCENT -->",
-        readme,
-    )
-    readme = re.sub(
-        r"<!-- TOTAL_PROGRESS_BAR -->.*?<!-- /TOTAL_PROGRESS_BAR -->",
-        f"<!-- TOTAL_PROGRESS_BAR -->**{generate_progress_bar(total_percent)}**<!-- /TOTAL_PROGRESS_BAR -->",
-        readme,
-    )
-    readme = re.sub(
-        r"<!-- LAST_UPDATED_DATE -->.*?<!-- /LAST_UPDATED_DATE -->",
-        f"<!-- LAST_UPDATED_DATE -->{today}<!-- /LAST_UPDATED_DATE -->",
-        readme,
-    )
+    readme = re.sub(r"<!-- TOTAL_SOLVED_COUNT -->.*?<!-- /TOTAL_SOLVED_COUNT -->",
+                    f"<!-- TOTAL_SOLVED_COUNT -->**{total_solved}**<!-- /TOTAL_SOLVED_COUNT -->", readme)
+    readme = re.sub(r"<!-- TOTAL_PROGRESS_PERCENT -->.*?<!-- /TOTAL_PROGRESS_PERCENT -->",
+                    f"<!-- TOTAL_PROGRESS_PERCENT -->**{total_percent:.1f}**<!-- /TOTAL_PROGRESS_PERCENT -->", readme)
+    readme = re.sub(r"<!-- TOTAL_PROGRESS_BAR -->.*?<!-- /TOTAL_PROGRESS_BAR -->",
+                    f"<!-- TOTAL_PROGRESS_BAR -->**{generate_progress_bar(total_percent)}**<!-- /TOTAL_PROGRESS_BAR -->", readme)
+    readme = re.sub(r"<!-- LAST_UPDATED_DATE -->.*?<!-- /LAST_UPDATED_DATE -->",
+                    f"<!-- LAST_UPDATED_DATE -->{today}<!-- /LAST_UPDATED_DATE -->", readme)
 
     for diff in ["Easy", "Medium", "Hard"]:
         solved = counts[diff]
         percent = solved / LEETCODE_TOTALS[diff] * 100
-
-        readme = re.sub(
-            rf"<!-- {diff.upper()}_SOLVED_COUNT -->.*?<!-- /{diff.upper()}_SOLVED_COUNT -->",
-            f"<!-- {diff.upper()}_SOLVED_COUNT -->{solved}<!-- /{diff.upper()}_SOLVED_COUNT -->",
-            readme,
-        )
-        readme = re.sub(
-            rf"<!-- {diff.upper()}_PROGRESS_PERCENT -->.*?<!-- /{diff.upper()}_PROGRESS_PERCENT -->",
-            f"<!-- {diff.upper()}_PROGRESS_PERCENT -->{percent:.1f}<!-- /{diff.upper()}_PROGRESS_PERCENT -->",
-            readme,
-        )
-        readme = re.sub(
-            rf"<!-- {diff.upper()}_PROGRESS_BAR -->.*?<!-- /{diff.upper()}_PROGRESS_BAR -->",
-            f"<!-- {diff.upper()}_PROGRESS_BAR -->{generate_progress_bar(percent)}<!-- /{diff.upper()}_PROGRESS_BAR -->",
-            readme,
-        )
+        readme = re.sub(rf"<!-- {diff.upper()}_SOLVED_COUNT -->.*?<!-- /{diff.upper()}_SOLVED_COUNT -->",
+                        f"<!-- {diff.upper()}_SOLVED_COUNT -->{solved}<!-- /{diff.upper()}_SOLVED_COUNT -->", readme)
+        readme = re.sub(rf"<!-- {diff.upper()}_PROGRESS_PERCENT -->.*?<!-- /{diff.upper()}_PROGRESS_PERCENT -->",
+                        f"<!-- {diff.upper()}_PROGRESS_PERCENT -->{percent:.1f}<!-- /{diff.upper()}_PROGRESS_PERCENT -->", readme)
+        readme = re.sub(rf"<!-- {diff.upper()}_PROGRESS_BAR -->.*?<!-- /{diff.upper()}_PROGRESS_BAR -->",
+                        f"<!-- {diff.upper()}_PROGRESS_BAR -->{generate_progress_bar(percent)}<!-- /{diff.upper()}_PROGRESS_BAR -->", readme)
 
     pie_chart = "\n".join([
         "## 📊 Solved Problems Distribution",
@@ -119,10 +104,8 @@ def update_readme(problems):
         f'    "Hard" : {counts["Hard"]}',
         "```"
     ])
-    readme = re.sub(
-        r"## 📊 Solved Problems Distribution[\s\S]*?(?=## |\Z)",
-        pie_chart + "\n", readme
-    )
+    readme = re.sub(r"## 📊 Solved Problems Distribution[\s\S]*?(?=## |\Z)",
+                    pie_chart + "\n", readme)
 
     with open(README_FILE, "w", encoding="utf-8") as f:
         f.write(readme)
@@ -150,16 +133,20 @@ def main():
         print(f"❌ Directory '{PROBLEMS_DIR}' not found.")
         return
 
-    problem_files = [os.path.join(PROBLEMS_DIR, f) for f in os.listdir(PROBLEMS_DIR) if f.endswith(".py")]
     problems = []
-    for file in problem_files:
-        info = extract_from_cleaned_format(file)
+    for filename in os.listdir(PROBLEMS_DIR):
+        if not filename.endswith(".py"):
+            continue
+        filepath = os.path.join(PROBLEMS_DIR, filename)
+        info = extract_problem_info(filepath)
         if info:
             problems.append(info)
+        else:
+            print(f"⚠️ Skipped '{filename}': format not recognized.")
 
     update_readme(problems)
     update_difficulty_files(problems)
-    print("✅ Updated README and difficulty files from cleaned headers.")
+    print("✅ All files updated successfully.")
 
 
 if __name__ == "__main__":
