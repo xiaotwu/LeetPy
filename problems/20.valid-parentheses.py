@@ -1,4 +1,4 @@
-# https://leetcode.com/problems/valid-parentheses
+# https://leetcode.com/problems/valid-parentheses/description/
 # [20] [Easy] Valid Parentheses
 
 class Solution:
