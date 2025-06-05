@@ -1,8 +1,8 @@
 <div align="center">
 
-<h1><img src="https://img.icons8.com/?size=100&id=121464&format=png&color=000000" width="30"/> LeetPy</h1>
+<h1><img src="https://www.flaticon.com/free-sticker/wink_10108621?related_id=10108621#" width="30"/> LeetPy</h1>
 
-<p><em>Solving LeetCode problems using <img src="https://img.shields.io/badge/Language-Python-blue?logo=python"/>.</em></p>
+<p><em>Solving LeetCode problems using <img src="https://www.flaticon.com/free-icon/python_5968350?term=python&page=1&position=5&origin=search&related_id=5968350#"/> .</em></p>
 
 </div>
 
