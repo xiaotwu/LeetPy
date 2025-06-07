@@ -1,11 +1,16 @@
-<div align="center">
+<h1 align="center">
+    LeetPy
+</h1>
 
-<h1><img src="https://www.flaticon.com/free-sticker/wink_10108621?related_id=10108621#" width="30"/> LeetPy</h1>
+<p align="center">
+  <em>Solving LeetCode problems using 
+    <img src="./assets/svg.svg" width="25" alt="python"/>
+  </em>
+</p>
 
-<p><em>Solving LeetCode problems using <img src="https://www.flaticon.com/free-icon/python_5968350?term=python&page=1&position=5&origin=search&related_id=5968350#"/> .</em></p>
-
-</div>
-
+<p align="center">
+  <img src="./assets/gif.gif" alt="Yanami" width="300"/>
+</p>
 
 ## 📈 Statistics
 
