@@ -11,3 +11,4 @@
 | 12 | [Integer to Roman](https://leetcode.com/problems/integer-to-roman/description/) | [12.integer-to-roman.py](../problems/12.integer-to-roman.py) |
 | 13 | [Roman to Integer](https://leetcode.com/problems/roman-to-integer/description/) | [13.roman-to-integer.py](../problems/13.roman-to-integer.py) |
 | 14 | [Longest Common Prefix](https://leetcode.com/problems/longest-common-prefix/description/) | [14.longest-common-prefix.py](../problems/14.longest-common-prefix.py) |
+| 50 | [Pow(x, n)](https://leetcode.com/problems/powx-n/description/) | [50.pow-x-n.py](../problems/50.pow-x-n.py) |
